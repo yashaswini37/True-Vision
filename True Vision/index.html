@@ -1,0 +1,367 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Detection Webpage</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        /* General Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Body Styling */
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, #ffffff, #ffffff);
+            color: #000000;
+        }
+
+        /* Navbar Styling */
+        /* Navbar Styling */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 10px 20px;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+
+        /* Navbar Heading (True Vision) */
+        .nav-heading {
+            font-size: 2em;
+            font-weight: 700;
+            color: #6e8efb; /* Highlight color */
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            background: linear-gradient(135deg, #ef25a1, #b20681);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 2px 2px 5px rgba(110, 142, 251, 0.5);
+            margin: 0;
+            padding: 5px 15px;
+            border-radius: 10px;
+        }
+
+              /* Navbar Links */
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .navbar a {
+            color: #fff;
+            text-decoration: none;
+            padding: 10px 15px;
+            transition:background 0.3s;
+        }
+
+        .navbar a:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+        }
+
+
+        /* Header Section */
+        .header {
+            background-image: url('img1.jpg');
+            background-position: center;
+            background-size: cover;
+            min-height: 100vh;
+            display: flex;
+            
+            align-items: center;
+            
+            padding-left: 200px;
+        }
+
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 20px;
+        }
+
+        .header p {
+            font-size: 1.5em;
+            margin-bottom: 40px;
+        }
+
+        .header a {
+            text-decoration: none;
+            color: #fff;
+            background: #6e8efb;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1.2em;
+            transition: background 0.3s, transform 0.3s;
+        }
+
+        .header a:hover {
+            background: #4f70db;
+            transform: translateY(-3px);
+        }
+        /* Highlighted Caption */
+        .highlighted-caption {
+            background-color: #6e8efb; /* Adjust color as per your design */
+            padding: 5px 10px;
+            border-radius: 5px;
+            color: #fff; /* Text color */
+        }
+
+
+        /* Features Section */
+        .features {
+            padding: 100px 20px;
+            background: rgba(136, 117, 117, 0.6);
+            background-image: url('img2.jpeg');
+            background-position: center;
+            background-size: cover;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .features h2 {
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 2.5em;
+        }
+
+        .features .feature-list {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .feature-box {
+            background-color: rgba(0, 0, 0, 0.892);
+            padding: 20px;
+            border-radius: 10px;
+            width: 30%; 
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+
+        .feature-box:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .feature-box h3 {
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #ffffff;
+        }
+
+        .feature-box p {
+            font-weight: bold;
+            color: #f6f4f4;
+        }
+        /* Use Cases Section */
+        .use-cases {
+            padding: 120px 40px;
+            background: rgba(180, 180, 180, 0.6);
+            background-image: url('img4.jpg'); /* Add a suitable background image */
+            background-position: center;
+            background-size: cover;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .use-cases h2 {
+            font-size: 2.8em;
+            margin-bottom: 50px;
+       }
+
+       .usecase-list {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 30px;
+        }
+
+        .usecase-box {
+            background-color: rgba(0, 0, 0, 0.85);
+            padding: 30px;
+            border-radius: 15px;
+            width: 35%;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+
+        .usecase-box:hover {
+            transform: scale(1.07);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
+        }
+
+        .usecase-box h3 {
+            font-weight: bold;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            color: #ffffff;
+        }
+
+        .usecase-box p {
+            font-weight: bold;
+            font-size: 1.1em;
+            color: #f6f4f4;
+            line-height: 1.6;
+        }
+
+        
+
+        /* Contact Section */
+        .contact {
+            background: rgba(236, 204, 204, 0.6);
+            color: #000000;
+            background-image: url('img3.jpg');
+            background-position: center;
+            background-size: cover;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .contact h2 {
+            margin-bottom: 20px;
+            font-size: 2em;
+        }
+
+        .boxx {
+            background-color: rgba(0, 0, 0, 0.892);
+            padding: 20px;
+            border-radius: 10px;
+            width: 30%; /* Adjust the width as necessary */
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #ffffff;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.8);
+        }
+
+        /* Utility Classes */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <h1 class="nav-heading">True Vision</h1>
+        <div class="nav-links">
+            <a href="#home">Home</a>
+            <a href="#features">Features</a>
+            <a href="#techstack">Tech Stack</a>
+            <a href="#usecases">UseCase</a>
+        </div>
+    </nav>
+
+    <!-- Header Section -->
+    <header class="header" id="home">
+        <div>
+            <h1>TRUE VISION</h1>
+            <p>See the World in True Color</p>
+            <a href="#features">Explore Features</a>
+        </div>
+    </header>
+
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <div class="container">
+            <h2>Features</h2>
+            <div class="feature-list">
+                <div class="feature-box" onclick="window.location.href='dynamic-background.html'">
+                    <h3>Dynamic Background</h3>
+                    <p>Background adjusts to selected colors and allows saving of chosen colors.</p>
+                </div>
+                <div class="feature-box" onclick="window.location.href='color-spaces.html'">
+                    <h3>Different Color Spaces</h3>
+                    <p>Displays RGB, HSV, HSL, CMYK, and HEX values for the selected color.</p>
+                </div>
+                <div class="feature-box" onclick="window.location.href='upload-image.html'">
+                    <h3>Upload Image</h3>
+                    <p>Detects and analyzes the color of the uploaded image.</p>
+                </div> 
+                <div class="feature-box" onclick="window.location.href='color-blindness.html'">
+                    <h3>CVD Simulation</h3>
+                    <p>Simulates color vision deficiency to show how colors appear to different vision types.</p>
+                </div>
+                <div class="feature-box" onclick="window.location.href='social-sharing.html'">
+                    <h3>Social Sharing</h3>
+                    <p>Shares saved colors on social media platforms like WhatsApp,Facebook,etc.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tech Stack Section -->
+    <section class="contact" id="techstack">
+        <h2 class="boxx">Technologies Used :<br> HTML, CSS, JavaScript</h2>
+    </section>
+    <!-- Use Cases Section -->
+    <section class="use-cases" id="usecases">
+        <div class="container">
+            <h2>Use Cases</h2>
+            <div class="usecase-list">
+                <div class="usecase-box">
+                    <h3>Graphic Designers</h3>
+                    <p>Helps designers pick perfect color combinations for UI/UX, branding, and marketing materials.</p>
+                </div>
+                <div class="usecase-box">
+                    <h3>Developers</h3>
+                    <p>Assists developers in selecting and converting colors between HEX, RGB, CMYK, and HSL.</p>
+                </div>
+                <div class="usecase-box">
+                    <h3>People with CVD (Color Vision Deficiency)</h3>
+                    <p>Simulates how colors appear to individuals with different types of color blindness.</p>
+                </div>
+                <div class="usecase-box">
+                    <h3>Artists & Content Creators</h3>
+                    <p>Helps digital artists and video editors choose accurate colors for their creative projects.</p>
+                </div>
+                <div class="usecase-box">
+                    <h3>E-commerce & Product Photography</h3>
+                   <p>Ensures product colors match accurately across digital platforms and real-world items.</p>
+                </div>
+           </div>
+        </div>
+    </section>
+
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2024 Color Detection Application. All rights reserved.</p>
+    </footer>
+</body>
+</html>
+

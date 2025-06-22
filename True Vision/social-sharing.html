@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Download and Share Screenshot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            margin: 0;
+        }
+
+        #video {
+            border: 2px solid #333;
+            margin-bottom: 20px;
+        }
+
+        #color-info {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        #current-color {
+            display: inline-block;
+            width: 100px;
+            height: 100px;
+            border: 1px solid #ccc;
+            margin-bottom: 10px;
+        }
+
+        #color-name, #color-hex {
+            margin: 5px 0;
+        }
+
+        .share-buttons {
+            margin: 20px 0;
+            display: flex;
+            gap: 10px;
+        }
+
+        .share-buttons a {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .whatsapp { background-image: url('https://cdn-icons-png.flaticon.com/128/15707/15707820.png'); }
+        .facebook { background-image: url('https://cdn-icons-png.flaticon.com/128/2504/2504903.png'); }
+        .twitter { background-image: url('https://cdn-icons-png.flaticon.com/128/2168/2168336.png'); }
+        .instagram { background-image: url('https://cdn-icons-png.flaticon.com/128/4138/4138124.png'); }
+
+        button {
+            padding: 10px 20px;
+            margin-top: 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Download and Share Screenshot</h1>
+    <video id="video" autoplay></video>
+    <div id="color-info">
+        <div id="current-color"></div>
+        <p id="color-name"></p>
+        <p id="color-hex"></p>
+    </div>
+    <button onclick="captureScreenshot()">Capture Screenshot</button>
+    <canvas id="screenshot-canvas" style="display: none;"></canvas>
+    <div class="share-buttons">
+        <a href="#" class="whatsapp" onclick="shareScreenshot('whatsapp')"></a>
+        <a href="#" class="facebook" onclick="shareScreenshot('facebook')"></a>
+        <a href="#" class="twitter" onclick="shareScreenshot('twitter')"></a>
+        <a href="#" class="instagram" onclick="shareScreenshot('instagram')"></a>
+    </div>
+    <button onclick="window.location.href='index.html'">Go to Main</button>
+
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('screenshot-canvas');
+        const ctx = canvas.getContext('2d');
+        const currentColorDiv = document.getElementById('current-color');
+        const colorName = document.getElementById('color-name');
+        const colorHex = document.getElementById('color-hex');
+
+        let colorData = [];
+        let currentColor = { name: '', hex: '' };
+
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                video.srcObject = stream;
+            });
+
+        video.addEventListener('click', (event) => {
+            const x = event.offsetX;
+            const y = event.offsetY;
+            const pixel = getPixelColor(x, y);
+            const rgb = { r: pixel[0], g: pixel[1], b: pixel[2] };
+            const hex = rgbToHex(rgb.r, rgb.g, rgb.b);
+            const colorName = getColorName(rgb.r, rgb.g, rgb.b);
+
+            currentColor = { name: colorName, hex };
+            updateColorInfo(currentColor);
+        });
+
+        function getPixelColor(x, y) {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const pixel = ctx.getImageData(x, y, 1, 1).data;
+            return pixel;
+        }
+
+        function captureScreenshot() {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = currentColor.hex;
+            ctx.font = '20px Arial';
+            ctx.fillText(`Name: ${currentColor.name}`, 10, 30);
+            ctx.fillText(`Hex: ${currentColor.hex}`, 10, 60);
+            const dataUrl = canvas.toDataURL('image/png');
+
+            const a = document.createElement('a');
+            a.href = dataUrl;
+            a.download = 'screenshot.png';
+            a.click();
+        }
+
+        function updateColorInfo(color) {
+            currentColorDiv.style.backgroundColor = color.hex;
+            colorName.innerText = `Name: ${color.name}`;
+            colorHex.innerText = `Hex: ${color.hex}`;
+        }
+
+        function shareScreenshot(platform) {
+            const dataUrl = canvas.toDataURL('image/png');
+            const encodedScreenshot = encodeURIComponent(dataUrl);
+            const shareUrls = {
+                whatsapp: `https://wa.me/?text=Check out this color: ${currentColor.name} - ${currentColor.hex}. ${encodedScreenshot}`,
+                facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}&quote=Check out this color: ${currentColor.name} - ${currentColor.hex}. ${encodedScreenshot}`,
+                twitter: `https://twitter.com/intent/tweet?text=Check out this color: ${currentColor.name} - ${currentColor.hex}. ${encodedScreenshot}`,
+                instagram: `https://www.instagram.com/?url=${encodeURIComponent(window.location.href)}&description=Check out this color: ${currentColor.name} - ${currentColor.hex}. ${encodedScreenshot}`
+            };
+
+            window.open(shareUrls[platform], '_blank');
+        }
+
+        function rgbToHex(r, g, b) {
+            return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase();
+        }
+
+        function getColorName(R, G, B) {
+            let minimum = 10000;
+            let cname = 'Unknown';
+            colorData.forEach(color => {
+                const d = Math.abs(R - color.R) + Math.abs(G - color.G) + Math.abs(B - color.B);
+                if (d < minimum) {
+                    minimum = d;
+                    cname = `${color.color_name}`;
+                }
+            });
+            return cname;
+        }
+
+        function parseCSV(data) {
+            const lines = data.split('\n');
+            const result = [];
+            const headers = ['color', 'color_name', 'hex', 'R', 'G', 'B'];
+            for (let i = 1; i < lines.length; i++) {
+                const obj = {};
+                const currentline = lines[i].split(',');
+
+                for (let j = 0; j < headers.length; j++) {
+                    obj[headers[j]] = currentline[j];
+                }
+
+                result.push(obj);
+            }
+            return result;
+        }
+
+        fetch('colors.csv')
+            .then(response => response.text())
+            .then(data => {
+                colorData = parseCSV(data);
+            });
+    </script>
+</body>
+</html>

@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Blindness Simulation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        #main-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            width: 80%;
+            margin-bottom: 30px;
+        }
+
+        #video {
+            border: 1px solid #ccc;
+            width: 60%;
+            height: auto;
+        }
+
+        #controls {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            width: 30%;
+        }
+
+        #color-info {
+            margin-bottom: 20px;
+            width: 100%;
+        }
+
+        #current-color {
+            width: 100%;
+            height: 100px;
+            border: 1px solid #ccc;
+            margin-bottom: 10px;
+        }
+        #normal-color {
+            width: 100%;
+            height: 100px;
+            border: 1px solid #ccc;
+            margin-bottom: 10px;
+        }
+
+        #color-blindness {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        #color-explanations {
+            width: 80%;
+            padding: 20px;
+            border: 1px solid #ccc;
+            background-color: #f2f2f2;
+        }
+
+        #explanation-boxes {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .explanation-box {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            background-color: #ffffff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .explanation-box img {
+            width: 100%;
+            height: 100%;
+            border: 1px solid #ccc;
+        }
+
+        .explanation-text {
+            flex: 1;
+            margin-right: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Color Blindness Simulation</h1>
+    <div id="main-container">
+        <video id="video" autoplay></video>
+        <div id="controls">
+            <div id="color-info">
+                <p>Normal Color</p>
+                <div id="normal-color"></div>
+                <p>Color Deficiency</p>
+                <div id="current-color"></div>
+            </div>
+            <select id="color-blindness">
+                <option value="">Select Color Blindness</option>
+                <option value="deuteranopia">Deuteranopia</option>
+                <option value="protanopia">Protanopia</option>
+                <option value="tritanopia">Tritanopia</option>
+                <option value="monochromatism">Monochromatism</option>
+            </select>
+            <button onclick="window.location.href='index.html'">Go to Main</button>
+        </div>
+    </div>
+
+    <div id="color-explanations">
+        <div id="explanation-boxes">
+            <div class="explanation-box">
+                <img src="colorBlindness.png" alt="Color Blindness Simulation">
+            </div>
+            <div class="explanation-box">
+                <div class="explanation-text">
+                    <h3>Deuteranopia</h3>
+                    <p>Deuteranopia is a type of red-green color blindness where green cones are missing. People with deuteranopia may confuse certain shades of red, yellow, green, and brown.</p>
+                </div>
+            </div>
+            <div class="explanation-box">
+                <div class="explanation-text">
+                    <h3>Protanopia</h3>
+                    <p>Protanopia is a type of red-green color blindness where red cones are missing. Individuals with protanopia may have difficulty distinguishing between reds and greens.</p>
+                </div>
+            </div>
+            <div class="explanation-box">
+                <div class="explanation-text">
+                    <h3>Tritanopia</h3>
+                    <p>Tritanopia is a type of blue-yellow color blindness where blue cones are missing. People with tritanopia may confuse blue with green and yellow with violet.</p>
+                </div>
+            </div>
+            <div class="explanation-box">
+                <div class="explanation-text">
+                    <h3>Monochromatism</h3>
+                    <p>Monochromatism, also known as total color blindness, is a rare form of color vision deficiency where an individual perceives only shades of gray, without any ability to distinguish between different colors. 
+                        This condition occurs when all of the cone cells in the retina, which are responsible for color vision, are either absent or non-functional.
+                         People with monochromatism see the world in black, white, and various shades of gray, similar to watching a black-and-white television.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const video = document.getElementById('video');
+        const currentColorDiv = document.getElementById('current-color');
+        const normalColorDiv = document.getElementById('normal-color');
+        const colorBlindnessSelect = document.getElementById('color-blindness');
+        
+        // Initialize video stream
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                video.srcObject = stream;
+            })
+            .catch(error => {
+                console.error('Error accessing webcam:', error);
+            });
+        
+        // Handle video click to get color
+        video.addEventListener('click', (event) => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const x = event.offsetX;
+            const y = event.offsetY;
+            const pixel = ctx.getImageData(x, y, 1, 1).data;
+            const rgb = { r: pixel[0], g: pixel[1], b: pixel[2] };
+            const hex = rgbToHex(rgb.r, rgb.g, rgb.b);
+        
+            normalColorDiv.style.backgroundColor = hex;
+            applyColorBlindness(rgb);
+        });
+        
+        // Update color based on color blindness selection
+        colorBlindnessSelect.addEventListener('change', () => {
+            const rgb = getCurrentColor(); // Function to get the currently displayed RGB color
+            if (rgb) {
+                applyColorBlindness(rgb);
+            }
+        });
+        
+        function getCurrentColor() {
+            const style = window.getComputedStyle(normalColorDiv);
+            const rgb = style.backgroundColor;
+            if (rgb) {
+                const match = rgb.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
+                if (match) {
+                    const [ , r, g, b ] = match.map(Number);
+                    return { r, g, b };
+                }
+            }
+            return null;
+        }
+        
+        function applyColorBlindness(rgb) {
+            const type = colorBlindnessSelect.value;
+            let newRgb = rgb;
+        
+            switch (type) {
+                case 'deuteranopia':
+                    newRgb = simulateDeuteranopia(rgb);
+                    break;
+                case 'protanopia':
+                    newRgb = simulateProtanopia(rgb);
+                    break;
+                case 'tritanopia':
+                    newRgb = simulateTritanopia(rgb);
+                    break;
+                case 'monochromatism':
+                    newRgb = simulateMonochromatism(rgb);
+                    break;
+                default:
+                    newRgb = rgb;
+            }
+        
+            newRgb = clampRgb(newRgb);
+            const hex = rgbToHex(newRgb.r, newRgb.g, newRgb.b);
+            currentColorDiv.style.backgroundColor = hex;
+        }
+        
+        function clampRgb(rgb) {
+            return {
+                r: Math.min(255, Math.max(0, Math.round(rgb.r))),
+                g: Math.min(255, Math.max(0, Math.round(rgb.g))),
+                b: Math.min(255, Math.max(0, Math.round(rgb.b)))
+            };
+        }
+        
+        function simulateDeuteranopia(rgb) {
+            // Transformation matrix for Deuteranopia
+            return {
+                r: 0.625 * rgb.r + 0.375 * rgb.g,
+                g: 0.7 * rgb.r + 0.3 * rgb.g,
+                b: 0.3 * rgb.g + 0.7 * rgb.b
+            };
+        }
+        
+        function simulateProtanopia(rgb) {
+            // Transformation matrix for Protanopia
+            return {
+                r: 0.567 * rgb.r + 0.433 * rgb.g,
+                g: 0.558 * rgb.r + 0.442 * rgb.g,
+                b: 0.242 * rgb.g + 0.758 * rgb.b
+            };
+        }
+        
+        function simulateTritanopia(rgb) {
+            // Transformation matrix for Tritanopia
+            return {
+                r: 0.95 * rgb.r + 0.05 * rgb.g,
+                g: 0.433 * rgb.r + 0.567 * rgb.g,
+                b: 0.475 * rgb.r + 0.525 * rgb.g
+            };
+        }
+        
+        function simulateMonochromatism(rgb) {
+            // Transformation for Monochromatism (grayscale)
+            const grayscaleValue = 0.3 * rgb.r + 0.59 * rgb.g + 0.11 * rgb.b;
+        
+            return {
+                r: grayscaleValue,
+                g: grayscaleValue,
+                b: grayscaleValue
+            };
+        }
+        
+        function rgbToHex(r, g, b) {
+            return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase();
+        }
+
+    </script>
+    
+</body>
+</html>

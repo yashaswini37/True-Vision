@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Different Color Spaces</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        #container {
+            display: flex;
+            justify-content: space-between;
+            width: 80%;
+            margin: 20px 0;
+        }
+
+        video {
+            width: 60%;
+            border: 2px solid #333;
+            border-radius: 8px;
+        }
+
+        #color-info {
+            width: 35%;
+            padding: 10px;
+            border: 2px solid #333;
+            border-radius: 8px;
+            background-color: #f5f5f5;
+        }
+
+        #current-color {
+            width: 100px;
+            height: 100px;
+            border: 1px solid #000;
+            margin-bottom: 10px;
+        }
+
+        p {
+            margin: 5px 0;
+        }
+
+        #color-explanations {
+            width: 80%;
+            margin-top: 30px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            background-color: #f2f2f2;
+        }
+
+        #explanation-boxes {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .explanation-box {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            background-color: #ffffff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .explanation-box img {
+            width: 300px;
+            height: 300px;
+            border: 1px solid #ccc;
+        }
+
+        .explanation-text {
+            flex: 1;
+            margin-right: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Different Color Spaces</h1>
+    <div id="container">
+        <video id="video" autoplay></video>
+        <div id="color-info">
+            <div id="current-color"></div>
+            <p id="color-name"></p>
+            <p id="color-rgb"></p>
+            <p id="color-hex"></p>
+            <p id="color-hsv"></p>
+            <p id="color-hsl"></p>
+            <p id="color-cmyk"></p>
+        </div>
+    </div>
+    <button onclick="window.location.href='index.html'">Go to Main</button>
+
+    <div id="color-explanations">
+        <div class="explanation-box">
+            
+            <div class="explanation-text">
+                <h3>RGB Color Space</h3>
+                <p>The RGB color space is based on the three primary colors of light: Red, Green, and Blue. <br>
+                   It is used in digital displays like monitors and TVs. <br>
+                   Colors are created by varying the intensity of each of the three colors.</p>
+            </div>
+            <img src="rgb.png" alt="RGB Color Space">
+        </div>
+        <div class="explanation-box">
+            
+            <div class="explanation-text">
+                <h3>HSV Color Space</h3>
+                <p>HSV stands for Hue, Saturation, and Value. <br>
+                    It is often used in graphics programs because it is more intuitive for humans to understand color variations using hue, saturation, and brightness levels.</p>
+            </div>
+            <img src="hsv.png" alt="HSV Color Space">
+        </div>
+        <div class="explanation-box">
+            
+            <div class="explanation-text">
+                <h3>HSL Color Space</h3>
+                <p>HSL stands for Hue, Saturation, and Lightness. <br>
+                    It is similar to HSV but uses lightness instead of value. <br>
+                    It is often used in design applications for more natural color adjustments.</p>
+            </div>
+            <img src="hsl.png" alt="HSL Color Space">
+        </div>
+        <div class="explanation-box">
+            
+            <div class="explanation-text">
+                <h3>CMYK Color Space</h3>
+                <p>CMYK stands for Cyan, Magenta, Yellow, and Key (Black). <br>
+                    It is a subtractive color model used in color printing. <br>
+                    Unlike RGB, CMYK works by subtracting light from white paper, using inks of these four colors.</p>
+            </div>
+            <img src="cmyk.png" alt="CMYK Color Space">
+        </div>
+    </div>
+
+    <script>
+        const video = document.getElementById('video');
+        const currentColorDiv = document.getElementById('current-color');
+        const colorName = document.getElementById('color-name');
+        const colorRgb = document.getElementById('color-rgb');
+        const colorHex = document.getElementById('color-hex');
+        const colorHsv = document.getElementById('color-hsv');
+        const colorHsl = document.getElementById('color-hsl');
+        const colorCmyk = document.getElementById('color-cmyk');
+        let colorData = [];
+
+        // Load the colors.csv file from the uploaded file
+        fetch('colors.csv')
+            .then(response => response.text())
+            .then(data => {
+                colorData = parseCSV(data);
+            });
+
+        // Function to parse CSV data into a JSON object
+        function parseCSV(data) {
+            const lines = data.split('\n');
+            const result = [];
+            const headers = ['color', 'color_name', 'hex', 'R', 'G', 'B'];
+
+            for (let i = 1; i < lines.length; i++) {
+                const obj = {};
+                const currentline = lines[i].split(',');
+
+                for (let j = 0; j < headers.length; j++) {
+                    obj[headers[j]] = currentline[j];
+                }
+
+                result.push(obj);
+            }
+            return result;
+        }
+
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                video.srcObject = stream;
+            });
+
+        video.addEventListener('click', (event) => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const x = event.offsetX;
+            const y = event.offsetY;
+            const pixel = ctx.getImageData(x, y, 1, 1).data;
+            const rgb = { r: pixel[0], g: pixel[1], b: pixel[2] };
+            const hex = rgbToHex(rgb.r, rgb.g, rgb.b);
+            const hsv = rgbToHsv(rgb.r, rgb.g, rgb.b);
+            const hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
+            const cmyk = rgbToCmyk(rgb.r, rgb.g, rgb.b);
+            const name = getColorName(rgb.r, rgb.g, rgb.b);
+
+            const color = {
+                name,
+                rgb,
+                hex,
+                hsv,
+                hsl,
+                cmyk
+            };
+
+            updateColorInfo(color);
+
+            document.body.style.backgroundColor = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
+        });
+
+        function updateColorInfo(color) {
+            currentColorDiv.style.backgroundColor = color.hex;
+            colorName.innerText = `Name: ${color.name}`;
+            colorRgb.innerText = `RGB: (${color.rgb.r}, ${color.rgb.g}, ${color.rgb.b})`;
+            colorHex.innerText = `Hex: ${color.hex}`;
+            colorHsv.innerText = `HSV: (${color.hsv.h}, ${color.hsv.s}%, ${color.hsv.v}%)`;
+            colorHsl.innerText = `HSL: (${color.hsl.h}, ${color.hsl.s}%, ${color.hsl.l}%)`;
+            colorCmyk.innerText = `CMYK: (${color.cmyk.c}%, ${color.cmyk.m}%, ${color.cmyk.y}%, ${color.cmyk.k}%)`;
+        }
+
+        function getColorName(R, G, B) {
+            let minimum = 10000;
+            let cname = 'Unknown';
+            colorData.forEach(color => {
+                const d = Math.abs(R - color.R) + Math.abs(G - color.G) + Math.abs(B - color.B);
+                if (d < minimum) {
+                    minimum = d;
+                    cname = `${color.color_name}`;
+                }
+            });
+            return cname;
+        }
+
+        function rgbToHex(r, g, b) {
+            return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase();
+        }
+
+        function rgbToHsv(r, g, b) {
+            r /= 255, g /= 255, b /= 255;
+            let max = Math.max(r, g, b), min = Math.min(r, g, b);
+            let h, s, v = max;
+            let d = max - min;
+            s = max === 0 ? 0 : d / max;
+            if (max === min) {
+                h = 0;
+            } else {
+                switch (max) {
+                    case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+                    case g: h = (b - r) / d + 2; break;
+                    case b: h = (r - g) / d + 4; break;
+                }
+                h /= 6;
+            }
+            return { h: Math.round(h * 360), s: Math.round(s * 100), v: Math.round(v * 100) };
+        }
+
+        function rgbToHsl(r, g, b) {
+            r /= 255, g /= 255, b /= 255;
+            let max = Math.max(r, g, b), min = Math.min(r, g, b);
+            let h, s, l = (max + min) / 2;
+            if (max === min) {
+                h = s = 0;
+            } else {
+                let d = max - min;
+                s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+                switch (max) {
+                    case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+                    case g: h = (b - r) / d + 2; break;
+                    case b: h = (r - g) / d + 4; break;
+                }
+                h /= 6;
+            }
+            return { h: Math.round(h * 360), s: Math.round(s * 100), l: Math.round(l * 100) };
+        }
+
+        function rgbToCmyk(r, g, b) {
+            let c = 1 - (r / 255);
+            let m = 1 - (g / 255);
+            let y = 1 - (b / 255);
+            let k = Math.min(c, m, y);
+            c = (c - k) / (1 - k);
+            m = (m - k) / (1 - k);
+            y = (y - k) / (1 - k);
+            return { c: Math.round(c * 100), m: Math.round(m * 100), y: Math.round(y * 100), k: Math.round(k * 100) };
+        }
+    </script>
+</body>
+</html>

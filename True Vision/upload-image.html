@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Detection App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            margin: 0;
+        }
+
+        #image-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #uploaded-image {
+            display: none;
+            margin-top: 20px;
+            border: 2px solid #333;
+        }
+
+        #color-info {
+            margin-top: 20px;
+            text-align: center;
+            background-color: white;
+            padding: 10px;
+            border-radius: 8px;
+            width: fit-content;
+        }
+
+        #current-color {
+            margin-top: 20px;
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        #color-history {
+            margin-top: 20px;
+            width: 80%;
+            max-height: 200px;
+            overflow-y: scroll;
+            border: 1px solid #333;
+            border-radius: 8px;
+            background-color: white;
+            padding: 10px;
+        }
+
+        .color-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .color-box {
+            width: 40px;
+            height: 40px;
+            border: 1px solid #ccc;
+            margin-right: 10px;
+        }
+
+        .remove-btn {
+            margin-left: auto;
+            background: #f44336;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+        canvas {
+            display: none;
+        }
+
+        input[type="file"] {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <input type="file" id="file-input" accept="image/*">
+    
+    <div id="image-container">
+        <img id="uploaded-image" />
+    </div>
+    
+    <div id="color-info">
+        <div id="current-color">Upload an image and click on it to detect color</div>
+    </div>
+
+    <div id="color-history"></div>
+
+    <canvas id="screenshot-canvas"></canvas>
+
+    <script>
+        const fileInput = document.getElementById('file-input');
+        const uploadedImage = document.getElementById('uploaded-image');
+        const canvas = document.getElementById('screenshot-canvas');
+        const ctx = canvas.getContext('2d');
+        const currentColorText = document.getElementById('current-color');
+        const colorHistory = document.getElementById('color-history');
+        let colorData = [];
+        let history = [];
+
+        // Load the colors.csv file from the uploaded file
+        fetch('colors.csv')
+            .then(response => response.text())
+            .then(data => {
+                colorData = parseCSV(data);
+            });
+
+        // Function to parse CSV data into a JSON object
+        function parseCSV(data) {
+            const lines = data.split('\n');
+            const result = [];
+            const headers = ['color', 'color_name', 'hex', 'R', 'G', 'B'];
+
+            for (let i = 1; i < lines.length; i++) {
+                const obj = {};
+                const currentline = lines[i].split(',');
+
+                for (let j = 0; j < headers.length; j++) {
+                    obj[headers[j]] = currentline[j];
+                }
+
+                result.push(obj);
+            }
+            return result;
+        }
+
+        // Function to calculate the closest color name
+        function getColorName(R, G, B) {
+            let minimum = 10000;
+            let cname = 'Unknown';
+            colorData.forEach(color => {
+                const d = Math.abs(R - color.R) + Math.abs(G - color.G) + Math.abs(B - color.B);
+                if (d < minimum) {
+                    minimum = d;
+                    cname = `${color.color_name}`;
+                }
+            });
+            return cname;
+        }
+
+        // Function to add color to history
+        function addColorToHistory(R, G, B, colorName) {
+            const colorHex = `rgb(${R}, ${G}, ${B})`;
+            const colorEntry = {
+                colorHex,
+                colorName
+            };
+            history.push(colorEntry);
+            updateColorHistory();
+        }
+
+        // Function to update the color history UI
+        function updateColorHistory() {
+            colorHistory.innerHTML = '';
+            history.forEach((entry, index) => {
+                const colorItem = document.createElement('div');
+                colorItem.className = 'color-item';
+
+                const colorBox = document.createElement('div');
+                colorBox.className = 'color-box';
+                colorBox.style.backgroundColor = entry.colorHex;
+                colorItem.appendChild(colorBox);
+
+                const colorText = document.createElement('span');
+                colorText.innerText = entry.colorName;
+                colorItem.appendChild(colorText);
+
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'remove-btn';
+                removeBtn.innerText = 'Remove';
+                removeBtn.addEventListener('click', () => {
+                    history.splice(index, 1);
+                    updateColorHistory();
+                });
+                colorItem.appendChild(removeBtn);
+
+                colorHistory.appendChild(colorItem);
+            });
+        }
+
+        // Handle file upload
+        fileInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    uploadedImage.src = e.target.result;
+                    uploadedImage.style.display = 'block';
+                    uploadedImage.onload = () => {
+                        canvas.width = uploadedImage.width;
+                        canvas.height = uploadedImage.height;
+                    };
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Handle image click to detect color
+        uploadedImage.addEventListener('click', (event) => {
+            const x = event.offsetX;
+            const y = event.offsetY;
+            ctx.drawImage(uploadedImage, 0, 0, canvas.width, canvas.height);
+
+            const pixel = ctx.getImageData(x, y, 1, 1).data;
+            const R = pixel[0];
+            const G = pixel[1];
+            const B = pixel[2];
+
+            const colorName = getColorName(R, G, B);
+            currentColorText.innerText = colorName;
+
+            document.body.style.backgroundColor = `rgb(${R}, ${G}, ${B})`;
+
+            // Add the detected color to history
+            addColorToHistory(R, G, B, colorName);
+        });
+    </script>
+</body>
+</html>
